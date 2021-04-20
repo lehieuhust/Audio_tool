@@ -2,8 +2,8 @@ import os
 import sys
 import shutil
 import time
-import threading
 import speech_recognition as sr
+import moviepy.editor as video_to_audio
 from sys import exit
 from pathlib import Path
 from functools import partial
@@ -11,55 +11,51 @@ from pydub import AudioSegment
 from pydub.silence import split_on_silence
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
-from PyQt5.QtWidgets import (
-    QMessageBox,
-    QApplication,
-    QLabel,
-    QMainWindow,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import QMessageBox
 
-TEXT_FILE_DIR = 'text_file'
 google_recognition = sr.Recognizer()
-
-def speed_change(path, speed):
-    audio_split_file = AudioSegment.from_file(path)
-    sound_with_altered_frame_rate = audio_split_file._spawn(audio_split_file.raw_data, overrides={
-        "frame_rate": int(audio_split_file.frame_rate * speed)
-    })
-
-    slow_audio = path.replace(".mp3", "_modi.mp3")
-    print(slow_audio)
-    sound_with_altered_frame_rate.export(slow_audio, format="mp3")
-    print(f"Slowdown audio file: {slow_audio}")
-    return slow_audio
 
 class audio_convert(QObject):
     finished = pyqtSignal()
     update_progress = pyqtSignal(int, int, str, str, str)
     update_error = pyqtSignal(int)
-    
+
+    def mp4_to_mp3(self, mp4_file_list):
+        mp3_file_list = []
+        for idx in range(len(mp4_file_list)):
+            file_name, extension = os.path.splitext(mp4_file_list[idx])
+            if extension == ".mp4":
+                mp3_out_file = mp4_file_list[idx].replace(".mp4", ".mp3")
+                clip = video_to_audio.VideoFileClip(mp4_file_list[idx])
+                clip.audio.write_audiofile(mp3_out_file)
+                mp3_file_list.append(mp3_out_file)
+            else:
+                print(f"Không cần chuyển file: {mp4_file_list[idx]}")
+
+        return mp3_file_list
+
     def audio_to_text(self, audio_file_list, speed_ms, lang_encode):
         percentage_audio = 0
         percentage_file = 0
         per_file = "0/0"
         audio_file_cnt = 0
-        audio_total_file = len(audio_file_list)
-        print(f"[audio_to_text] audio_file_list:  {audio_file_list}")
+
+        audio_list = self.mp4_to_mp3(audio_file_list)
+        audio_total_file = len(audio_list)
+        print(f"[audio_to_text] Audio list: {audio_list}")
         print(f"[audio_to_text] Tốc độ dịch: {speed_ms}ms")
         self.update_progress.emit(0, 0, "0/0", "", "")
-        if not audio_file_list:
+
+        if not audio_list:
             print("[audio_to_text] Bạn đã chưa chọn files audio")
             return
         
-        for audio_file in audio_file_list:
+        for audio_file in audio_list:
             audio_file_cnt += 1
             song = AudioSegment.from_mp3(audio_file)
             chunks = split_on_silence(song,
                                       min_silence_len=speed_ms,
-                                      silence_thresh=-50)
+                                      silence_thresh=-37)
             
             recog_file_name = audio_file.replace(".mp3", ".txt")
             recog_file = open(recog_file_name, "w+", encoding="utf-8")
@@ -101,6 +97,9 @@ class audio_convert(QObject):
                     print("Could not understand audio")
                 except sr.RequestError as e:
                     print("Could not request results. check your internet connection")
+                    recog_file.close()
+                    if os.path.exists('audio_chunks'):
+                        shutil.rmtree('audio_chunks')
                     self.update_error.emit(1)
                     self.finished.emit()
                     return
@@ -111,20 +110,20 @@ class audio_convert(QObject):
                 else:
                     percent_file = round((percentage_file * percentage_audio) / 100)
                 print(f"Chuyển đổi: {percent_file}% file")
+
                 self.update_progress.emit(percentage_audio, percent_file, per_file, audio_file, recog_file_name)
                 if os.path.exists(filename):
                     os.remove(filename)
             
-            if os.path.exists('audio_chunks'):
-                shutil.rmtree('audio_chunks')
 
             os.chdir('..')
+            if os.path.exists('audio_chunks'):
+                shutil.rmtree('audio_chunks')
             print(f"File text: {recog_file_name}")
             recog_file.close()
         
         self.update_error.emit(0)
         self.finished.emit()
-    
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -146,6 +145,8 @@ class Ui_Form(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
 
         self.msgBox = QtWidgets.QMessageBox(Form)
+        self.msgBox.setStandardButtons(QMessageBox.Ok)
+        # self.msgBtn = self.msgBox.addButton("OK", QMessageBox.ActionRole)
 
         self.label_select_lang = QtWidgets.QLabel(Form)
         self.label_select_lang.setGeometry(QtCore.QRect(60, 30, 110, 30))
@@ -257,64 +258,72 @@ class Ui_Form(object):
         self.label_saving_text_file.setText(_translate("Form", "Đang lưu vào file:"))
         self.progressBar_file.setFormat(_translate("Form", "%p/%p"))
         self.label_convert_progress.setText(_translate("Form", "Dịch xong:"))
-    
+
     def finish_select_lang(self):
         print (f"Bạn chọn ngôn ngữ: {self.comboBox_lang.currentText()}")
         self.lang_select_cnt = True
         if self.comboBox_lang.currentText() == "Tiếng Việt":
+            self.set_text_debug("Chọn ngôn ngữ - Tiếng Việt")
             self.lang_encode = "vi-VN"
         elif self.comboBox_lang.currentText() == "English":
+            self.set_text_debug("Chọn ngôn ngữ - Tiếng Anh")
             self.lang_encode = "en-US"
         return self.lang_encode
-    
+
     def finish_select_speed(self):
         print (f"Bạn chọn tốc độ dịch: {self.comboBox_speed.currentText()}")
         self.speed_select_cnt = True
         if self.comboBox_speed.currentText() == "Chậm":
-            print("Tốc độ dịch - Chậm")
+            self.set_text_debug("Tốc độ dịch - Chậm")
             self.speed_ms = 850
         elif self.comboBox_speed.currentText() == "Bình thường":
-            print("Tốc độ dịch - Bình thường")
+            self.set_text_debug("Tốc độ dịch - Bình thường")
             self.speed_ms = 450
         elif self.comboBox_speed.currentText() == "Nhanh":
-            print("Tốc độ dịch - Nhanh")
-            self.speed_ms = 100
+            self.set_text_debug("Tốc độ dịch - Nhanh")
+            self.speed_ms = 150
         return self.speed_ms
-    
+
     def browse_audio_files(self):
         home_dir = str(Path.home())
         self.audio_file_list, _ = QtWidgets.QFileDialog.getOpenFileNames(parent=Form, caption='Select File', directory=home_dir, filter="Audio files (*.mp3 *.mp4)")
-    
+        self.set_text_debug(str(self.audio_file_list))
+
+    def set_text_debug(self, text):
+        self.label_debug.setText(text)
+        self.label_debug.adjustSize()
+
     def show_err(self, err_text):
         self.msgBox.setIcon(QMessageBox.Critical)
         self.msgBox.setWindowTitle("Lỗi")
         self.msgBox.setText(err_text)
-        self.msgBox.exec()
-    
+        self.msgBox.exec_()
+
     def show_info(self, info_text):
         self.msgBox.setIcon(QMessageBox.Information)
         self.msgBox.setWindowTitle("Info")
         self.msgBox.setText(info_text)
-        self.msgBox.exec()
-    
+        ret = self.msgBox.exec_()
+        if ret == QMessageBox.Ok:
+            print("Exit info message box")
+            self.update_bar(0, 0, "0/0", "", "")
+        # if self.msgBox.clickedButton() == self.msgBtn:
+
     def update_err(self, err):
         if err == 1:
             self.show_err("Lỗi kết nối mạng. Hãy thử lại sau !!!")
         elif err == 0:
-            self.show_info("Đã chuyển đổi xong file audio")
+            self.show_info("Đã chuyển đổi xong file audio !!!")
             self.label_converting_file.setText("Đã dịch xong:")
             self.label_saving_text_file.setText("Đã lưu xong:")
-    
-    def update_bar(self, percent_audio, percent_file, per_file, audio_file, op_text_file):
-        # print (f"Chuyển đổi audio: {percent_audio}%")
-        # print (f"Chuyển đổi file: {percent_file}%")
-        # print (f"Audio file: {audio_file}")
-        # print (f"Text file: {op_text_file}")
+            self.set_text_debug("")
 
+    def update_bar(self, percent_audio, percent_file, per_file, audio_file, op_text_file):
         self.text_audio_file.setText(audio_file)
         self.text_audio_file.setCursorPosition(0)
+        self.set_text_debug("Đang dịch file: " + os.path.basename(audio_file))
 
-        self.text_file.setText(op_text_file)   
+        self.text_file.setText(op_text_file)
         self.text_file.setCursorPosition(0)
 
         self.progressBar_audio.setValue(percent_audio)
@@ -322,6 +331,17 @@ class Ui_Form(object):
         self.progressBar_file.setValue(percent_file)
         self.progressBar_file.setFormat(per_file)
 
+    # def mp4_to_mp3(self):
+    #     for idx in range(len(self.audio_file_list)):
+    #         file_name, extension = os.path.splitext(self.audio_file_list[idx])
+    #         if extension == ".mp4":
+    #             # print (f"Chuyển đổi file {self.audio_file_list[idx]} thành mp3")
+    #             mp3_out_file = self.audio_file_list[idx].replace(".mp4", ".mp3")
+    #             clip = video_to_audio.VideoFileClip(self.audio_file_list[idx])
+    #             clip.audio.write_audiofile(mp3_out_file)
+    #             self.audio_file_list[idx] = mp3_out_file
+    #         else:
+    #             print(f"Không cần chuyển file: {self.audio_file_list[idx]}")
 
     def start_convert_audio(self):
         print ("Start convert audio file")
@@ -366,7 +386,6 @@ class Ui_Form(object):
         self.thread.finished.connect(
             lambda: self.btn_start_convert.setEnabled(True)
         )
-    
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

@@ -60,7 +60,7 @@ def audio_to_text(path_list, lang="vi-VN"):
         audio_file_cnt += 1
         song = AudioSegment.from_mp3(audio_file)
         chunks = split_on_silence(song,
-                                  min_silence_len=270,
+                                  min_silence_len=330,
                                   silence_thresh=-47
                                   )
 

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>527</width>
+    <height>477</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Audio to text</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>audio.png</normaloff>audio.png</iconset>
+  </property>
+  <widget class="QPushButton" name="btn_exit">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>385</y>
+     <width>93</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Thoát</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_converting_file">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>180</y>
+     <width>110</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Đang dịch file:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_file_progress">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>280</y>
+     <width>115</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Số file đang dịch:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_saving_text_file">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>330</y>
+     <width>120</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Đang lưu vào file:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_select_audio_file">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>130</y>
+     <width>131</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Chọn file</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_speed">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>80</y>
+     <width>161</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::DefaultContextMenu</enum>
+   </property>
+   <property name="currentIndex">
+    <number>1</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Chậm</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Bình thường</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Nhanh</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_convert_progress">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>230</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Dịch xong:</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="progressBar_file">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>280</y>
+     <width>281</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="format">
+    <string>%p/%p</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_finish_select_lang">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>30</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_select_audio_file">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>130</y>
+     <width>115</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Chọn mp3 file:</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="progressBar_audio">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>230</y>
+     <width>281</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_lang">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>30</y>
+     <width>161</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Tiếng Việt</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>English</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_select_lang">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>30</y>
+     <width>110</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Chọn ngôn ngữ:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_select_speed">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>80</y>
+     <width>115</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Chọn tốc độ dịch:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="text_text_file">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>330</y>
+     <width>281</width>
+     <height>30</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_start_convert">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>130</y>
+     <width>101</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Bắt đầu</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="text_audio_file">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>180</y>
+     <width>281</width>
+     <height>30</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_finish_select_speed">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>80</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_debug">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>450</y>
+     <width>55</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

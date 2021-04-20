@@ -1,7 +1,6 @@
 import os
 import sys
 import shutil
-import time
 import speech_recognition as sr
 import moviepy.editor as video_to_audio
 from sys import exit
@@ -330,18 +329,6 @@ class Ui_Form(object):
 
         self.progressBar_file.setValue(percent_file)
         self.progressBar_file.setFormat(per_file)
-
-    # def mp4_to_mp3(self):
-    #     for idx in range(len(self.audio_file_list)):
-    #         file_name, extension = os.path.splitext(self.audio_file_list[idx])
-    #         if extension == ".mp4":
-    #             # print (f"Chuyển đổi file {self.audio_file_list[idx]} thành mp3")
-    #             mp3_out_file = self.audio_file_list[idx].replace(".mp4", ".mp3")
-    #             clip = video_to_audio.VideoFileClip(self.audio_file_list[idx])
-    #             clip.audio.write_audiofile(mp3_out_file)
-    #             self.audio_file_list[idx] = mp3_out_file
-    #         else:
-    #             print(f"Không cần chuyển file: {self.audio_file_list[idx]}")
 
     def start_convert_audio(self):
         print ("Start convert audio file")

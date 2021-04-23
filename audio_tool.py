@@ -2,7 +2,7 @@ import os
 import sys
 import shutil
 import speech_recognition as sr
-import moviepy.editor as video_to_audio
+import moviepy.video.io.VideoFileClip as VideoFile
 from sys import exit
 from pathlib import Path
 from functools import partial
@@ -19,18 +19,29 @@ class audio_convert(QObject):
     update_progress = pyqtSignal(int, int, str, str, str)
     update_error = pyqtSignal(int)
 
+    def speed_change(self, audio_file, speed):
+        audio_split_file = AudioSegment.from_file(audio_file)
+        sound_with_altered_frame_rate = audio_split_file._spawn(audio_split_file.raw_data, overrides={
+            "frame_rate": int(audio_split_file.frame_rate * speed)
+        })
+
+        slow_audio = audio_file.replace(".mp3", "_modi.mp3")
+        sound_with_altered_frame_rate.export(slow_audio, format="mp3")
+        print(f"Slowdown audio file: {slow_audio}")
+        return slow_audio
+
     def mp4_to_mp3(self, mp4_file_list):
         mp3_file_list = []
         for idx in range(len(mp4_file_list)):
             file_name, extension = os.path.splitext(mp4_file_list[idx])
             if extension == ".mp4":
+                self.update_error.emit(2)
                 mp3_out_file = mp4_file_list[idx].replace(".mp4", ".mp3")
-                clip = video_to_audio.VideoFileClip(mp4_file_list[idx])
-                clip.audio.write_audiofile(mp3_out_file)
+                clip = VideoFile.VideoFileClip(mp4_file_list[idx])
+                clip.audio.write_audiofile(filename=mp3_out_file, logger=None)
                 mp3_file_list.append(mp3_out_file)
             else:
-                print(f"Không cần chuyển file: {mp4_file_list[idx]}")
-
+                mp3_file_list.append(mp4_file_list[idx])
         return mp3_file_list
 
     def audio_to_text(self, audio_file_list, speed_ms, lang_encode):
@@ -113,7 +124,6 @@ class audio_convert(QObject):
                 self.update_progress.emit(percentage_audio, percent_file, per_file, audio_file, recog_file_name)
                 if os.path.exists(filename):
                     os.remove(filename)
-            
 
             os.chdir('..')
             if os.path.exists('audio_chunks'):
@@ -145,7 +155,6 @@ class Ui_Form(object):
 
         self.msgBox = QtWidgets.QMessageBox(Form)
         self.msgBox.setStandardButtons(QMessageBox.Ok)
-        # self.msgBtn = self.msgBox.addButton("OK", QMessageBox.ActionRole)
 
         self.label_select_lang = QtWidgets.QLabel(Form)
         self.label_select_lang.setGeometry(QtCore.QRect(60, 30, 110, 30))
@@ -306,10 +315,11 @@ class Ui_Form(object):
         if ret == QMessageBox.Ok:
             print("Exit info message box")
             self.update_bar(0, 0, "0/0", "", "")
-        # if self.msgBox.clickedButton() == self.msgBtn:
 
     def update_err(self, err):
-        if err == 1:
+        if err == 2:
+            self.set_text_debug("Đang tách file mp3 từ file mp4")
+        elif err == 1:
             self.show_err("Lỗi kết nối mạng. Hãy thử lại sau !!!")
         elif err == 0:
             self.show_info("Đã chuyển đổi xong file audio !!!")

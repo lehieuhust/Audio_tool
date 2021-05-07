@@ -286,10 +286,10 @@ class Ui_Form(object):
             self.speed_ms = 850
         elif self.comboBox_speed.currentText() == "Bình thường":
             self.set_text_debug("Tốc độ dịch - Bình thường")
-            self.speed_ms = 450
+            self.speed_ms = 350
         elif self.comboBox_speed.currentText() == "Nhanh":
             self.set_text_debug("Tốc độ dịch - Nhanh")
-            self.speed_ms = 150
+            self.speed_ms = 100
         return self.speed_ms
 
     def browse_audio_files(self):
